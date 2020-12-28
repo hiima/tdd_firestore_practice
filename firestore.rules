@@ -24,9 +24,13 @@ service cloud.firestore {
 
   match /databases/{database}/documents {
     match /users/{userId} {
-      allow create: if isAuthUser(request.auth, userId) && isValidUserSchema(request.resource.data) && isValidUserData(request.resource.data);
+      allow create: if isAuthUser(request.auth, userId)
+        && isValidUserSchema(request.resource.data)
+        && isValidUserData(request.resource.data);
       allow read: if isAuthUser(request.auth, userId);
-      allow update: if isAuthUser(request.auth, userId) && isValidUserSchema(request.resource.data) && isValidUserData(request.resource.data);
+      allow update: if isAuthUser(request.auth, userId)
+        && isValidUserSchema(request.resource.data)
+        && isValidUserData(request.resource.data);
       allow delete: if isAuthUser(request.auth, userId);
     }
   }
