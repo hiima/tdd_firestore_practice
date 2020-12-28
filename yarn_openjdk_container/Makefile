@@ -1,2 +1,2 @@
-register:
-	gcloud builds submit --project ${PJ} --config cloudbuild.yaml . 
+push:
+	gcloud builds submit --project ${PJ} --config cloudbuild.yaml .
