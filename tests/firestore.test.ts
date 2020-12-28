@@ -171,3 +171,101 @@ describe('スキーマの検証', () => {
     }));
   });
 });
+
+describe('値のバリデーション', () => {
+  test('`name`は1文字以上30文字以内であること', async () => {
+    const db = createAuthApp({
+      uid: 'taro'
+    });
+
+    const userDocumentRef = db.collection('users').doc('taro');
+
+    // 正しい値ではデータを作成できること
+    await firebase.assertSucceeds(
+      userDocumentRef.set({
+        ...correctUserData, name: 'a'.repeat(30)
+      })
+    );
+
+    // 正しくない値ではデータを作成できないこと
+    await firebase.assertFails(
+      userDocumentRef.set({
+        ...correctUserData, name: ''
+      })
+    );
+    await firebase.assertFails(
+      userDocumentRef.set({
+        ...correctUserData, name: 'a'.repeat(31)
+      })
+    );
+  });
+
+  test('`gender`は`male`, `female`, `genderDiverse`の3種類だけであること', async () => {
+    const db = createAuthApp({
+      uid: 'taro'
+    });
+
+    const userDocumentRef = db.collection('users').doc('taro');
+
+    // 正しい値ではデータを作成できること
+    await firebase.assertSucceeds(
+      userDocumentRef.set({
+        ...correctUserData, gender: 'male'
+      })
+    );
+    await firebase.assertSucceeds(
+      userDocumentRef.set({
+        ...correctUserData, gender: 'female'
+      })
+    );
+    await firebase.assertSucceeds(
+      userDocumentRef.set({
+        ...correctUserData, gender: 'genderDiverse'
+      })
+    );
+
+    // 正しくない値ではデータを作成できないこと
+    await firebase.assertFails(
+      userDocumentRef.set({
+        ...correctUserData, gender: ''
+      })
+    );
+    await firebase.assertFails(
+      userDocumentRef.set({
+        ...correctUserData, gender: '男性'
+      })
+    );
+  });
+
+  test('`age`は0以上150以下の数値であること', async () => {
+    const db = createAuthApp({
+      uid: 'taro'
+    });
+
+    const userDocumentRef = db.collection('users').doc('taro');
+
+    // 正しい値ではデータを作成できること
+    await firebase.assertSucceeds(
+      userDocumentRef.set({
+        ...correctUserData, age: 0
+      })
+    );
+    await firebase.assertSucceeds(
+      userDocumentRef.set({
+        ...correctUserData, age: 150
+      })
+    );
+
+    // 正しくない値ではデータを作成できないこと
+    await firebase.assertFails(
+      userDocumentRef.set({
+        ...correctUserData, age: -1
+      })
+    );
+    await firebase.assertFails(
+      userDocumentRef.set({
+        ...correctUserData, age: 151
+      })
+    );
+  });
+});
