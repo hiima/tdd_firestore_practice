@@ -14,6 +14,15 @@ const createAuthApp = (auth?: object): firebase.firestore.Firestore => {
     .firestore();
 };
 
+// 認証なしのFirestore Appを得る
+const createUnAuthApp = (): firebase.firestore.Firestore => {
+  return firebase
+    .initializeTestApp({
+      projectId: PROJECT_ID
+    })
+    .firestore();
+};
+
 // 管理者権限で操作可能なFirestore Appを得る
 const createAdminApp = (): firebase.firestore.Firestore => {
   return firebase
@@ -45,5 +54,16 @@ describe('Firestoreセキュリティルール', () => {
   // 後始末: Firestoreアプリの削除
   afterAll(async () => {
     await Promise.all(firebase.apps().map(app => app.delete()));
+  });
+
+  test('認証がなくても読み書きが可能であること', async () => {
+    const db = createUnAuthApp();
+    const user = userRef(db).doc('test');
+    // 書き
+    await firebase.assertSucceeds(user.set({
+      name: '太郎'
+    }));
+    // 読み
+    await firebase.assertSucceeds(user.get());
   });
 });
