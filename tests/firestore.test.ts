@@ -1,27 +1,27 @@
-import * as firebase from '@firebase/testing';
+import * as firebase from '@firebase/rules-unit-testing';
+import * as admin from 'firebase-admin';
 import * as fs from 'fs';
 
 const PROJECT_ID = 'qiita-demo';
 const RULES_PATH = 'firestore.rules';
 
-// 認証付きのFirestore Appを得る
-const createAuthApp = (auth?: object): firebase.firestore.Firestore => {
-  return firebase
-    .initializeTestApp({
-      projectId: PROJECT_ID,
-      auth: auth
-    })
-    .firestore();
-};
+// ユーザ用Firestore
+const createClientFirestore = ((uid: string) => {
+  return firebase.initializeTestApp({
+    projectId: PROJECT_ID,
+    auth: {
+      uid: uid
+    }
+  }).firestore();
+});
 
-// 管理者権限で操作可能なFirestore Appを得る
-const createAdminApp = (): firebase.firestore.Firestore => {
-  return firebase
-    .initializeAdminApp({
-      projectId: PROJECT_ID
-    })
-    .firestore();
-}
+// 管理者用Firestore
+const createAdminFirestore = (() => {
+  return firebase.initializeAdminApp({
+    projectId: PROJECT_ID
+  }).firestore();
+});
+
 
 const correctUserData = {
   name: 'suzuki taro',
@@ -51,9 +51,7 @@ afterAll(async () => {
 describe('ユーザ認証情報の検証', () => {
   test('自分のuidと等しいIDを持つユーザ情報だけをCRUD可能であること', async () => {
     // taroで認証を持つDBを作成
-    const db = createAuthApp({
-      uid: 'taro'
-    });
+    const db = createClientFirestore('taro');
 
     // taroでusersコレクションへの参照を取得
     const userDocumentRef = db.collection('users').doc('taro');
@@ -77,15 +75,13 @@ describe('ユーザ認証情報の検証', () => {
 
   test('自分のuidと異なるIDを持つユーザ情報はCRUD不可能であること', async () => {
     // 事前にadmin権限で別ユーザデータを準備
-    createAdminApp()
+    createAdminFirestore()
       .collection('users')
       .doc('taro')
       .set(correctUserData);
 
     // hanakoで認証を持つDBを作成
-    const db = createAuthApp({
-      uid: 'hanako'
-    });
+    const db = createClientFirestore('hanako');
 
     // taroでusersコレクションへの参照を取得
     const userDocumentRef = db.collection('users').doc('taro');
@@ -110,9 +106,7 @@ describe('ユーザ認証情報の検証', () => {
 
 describe('スキーマの検証', () => {
   test('正しくないスキーマの場合は作成できないこと', async () => {
-    const db = createAuthApp({
-      uid: 'taro'
-    });
+    const db = createClientFirestore('taro');
 
     const userDocumentRef = db.collection('users').doc('taro');
 
@@ -142,14 +136,12 @@ describe('スキーマの検証', () => {
   });
 
   test('正しくないスキーマの場合は編集できないこと', async () => {
-    createAdminApp()
+    createAdminFirestore()
       .collection('users')
       .doc('taro')
       .set(correctUserData);
 
-    const db = createAuthApp({
-      uid: 'taro'
-    });
+    const db = createClientFirestore('taro');
 
     const userDocumentRef = db.collection('users').doc('taro');
 
@@ -173,9 +165,7 @@ describe('スキーマの検証', () => {
 
 describe('値のバリデーション', () => {
   test('`name`は1文字以上30文字以内であること', async () => {
-    const db = createAuthApp({
-      uid: 'taro'
-    });
+    const db = createClientFirestore('taro');
 
     const userDocumentRef = db.collection('users').doc('taro');
 
@@ -200,9 +190,7 @@ describe('値のバリデーション', () => {
   });
 
   test('`gender`は`male`, `female`, `genderDiverse`の3種類だけであること', async () => {
-    const db = createAuthApp({
-      uid: 'taro'
-    });
+    const db = createClientFirestore('taro');
 
     const userDocumentRef = db.collection('users').doc('taro');
 
@@ -237,9 +225,7 @@ describe('値のバリデーション', () => {
   });
 
   test('`age`は0以上150以下の数値であること', async () => {
-    const db = createAuthApp({
-      uid: 'taro'
-    });
+    const db = createClientFirestore('taro');
 
     const userDocumentRef = db.collection('users').doc('taro');
 
