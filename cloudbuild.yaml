@@ -1,0 +1,12 @@
+steps:
+  - id: 'Install:npm_packages'
+    name: 'gcr.io/$PROJECT_ID/maven-node-openjdk'
+    args: ['npm', 'install']
+    waitFor: ['-']
+  - id: 'Run:test'
+    name: 'gcr.io/$PROJECT_ID/maven-node-openjdk'
+    args: ['npm', 'run', 'ci-test']
+    env:
+    - 'FIRESTORE_EMULATOR_HOST=localhost:8080'
+    waitFor: ['Install:npm_packages']
+timeout: 600s
