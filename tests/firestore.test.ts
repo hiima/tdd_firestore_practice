@@ -21,7 +21,6 @@ const createAdminFirestore = (() => {
   }).firestore();
 });
 
-
 const correctUserData = {
   name: 'suzuki taro',
   gender: 'male',
