@@ -1,4 +1,5 @@
 rules_version = '2';
+
 service cloud.firestore {
   // ユーザ認証の関数
   function isAuthUser(auth, userId) {
@@ -14,11 +15,18 @@ service cloud.firestore {
       && 'age' in u && u.age is number // `age`プロパティがあり、型がnumberであること
   }
 
+  // 値のバリデーションの関数
+  function isValidUserData(u) {
+    return 1 <= u.name.size() && u.name.size() <= 30
+      && u.gender.matches('male|female|genderDiverse')
+      && 0 <= u.age && u.age <= 150
+  }
+
   match /databases/{database}/documents {
     match /users/{userId} {
-      allow create: if isAuthUser(request.auth, userId) && isValidUserSchema(request.resource.data);
+      allow create: if isAuthUser(request.auth, userId) && isValidUserSchema(request.resource.data) && isValidUserData(request.resource.data);
       allow read: if isAuthUser(request.auth, userId);
-      allow update: if isAuthUser(request.auth, userId) && isValidUserSchema(request.resource.data);
+      allow update: if isAuthUser(request.auth, userId) && isValidUserSchema(request.resource.data) && isValidUserData(request.resource.data);
       allow delete: if isAuthUser(request.auth, userId);
     }
   }
