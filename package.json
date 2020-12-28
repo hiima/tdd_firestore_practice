@@ -13,7 +13,7 @@
     "typescript": "^4.1.3"
   },
   "scripts": {
-    "test": "jest --env=node"
+    "test": "FIRESTORE_EMULATOR_HOST=localhost:8080 jest --env=node"
   },
   "jest": {
     "moduleFileExtensions": [
