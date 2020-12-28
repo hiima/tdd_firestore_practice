@@ -1,5 +1,4 @@
 import * as firebase from '@firebase/rules-unit-testing';
-import * as admin from 'firebase-admin';
 import * as fs from 'fs';
 
 const PROJECT_ID = 'qiita-demo';
