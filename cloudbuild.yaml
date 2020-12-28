@@ -1,11 +1,11 @@
 steps:
   - id: 'Install:npm_packages'
-    name: 'gcr.io/$PROJECT_ID/maven-node-openjdk'
-    args: ['npm', 'install']
+    name: 'gcr.io/$PROJECT_ID/yarn-openjdk '
+    args: ['yarn', 'install']
     waitFor: ['-']
   - id: 'Run:test'
-    name: 'gcr.io/$PROJECT_ID/maven-node-openjdk'
-    args: ['npm', 'run', 'ci-test']
+    name: 'gcr.io/$PROJECT_ID/yarn-openjdk '
+    args: ['yarn', 'ci-test']
     env:
     - 'FIRESTORE_EMULATOR_HOST=localhost:8080'
     waitFor: ['Install:npm_packages']
