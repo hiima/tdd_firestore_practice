@@ -29,26 +29,26 @@ const correctUserData = {
   age: 30
 };
 
+beforeAll(async () => {
+  await firebase.loadFirestoreRules({
+    projectId: PROJECT_ID,
+    rules: fs.readFileSync(RULES_PATH, 'utf-8')
+  });
+});
+
+// Firestoreデータのクリーンアップ
+afterEach(async () => {
+  await firebase.clearFirestoreData({
+    projectId: PROJECT_ID
+  });
+});
+
+// 後始末: Firestoreアプリの削除
+afterAll(async () => {
+  await Promise.all(firebase.apps().map(app => app.delete()));
+});
+
 describe('ユーザ認証情報の検証', () => {
-  beforeAll(async () => {
-    await firebase.loadFirestoreRules({
-      projectId: PROJECT_ID,
-      rules: fs.readFileSync(RULES_PATH, 'utf-8')
-    });
-  });
-
-  // Firestoreデータのクリーンアップ
-  afterEach(async () => {
-    await firebase.clearFirestoreData({
-      projectId: PROJECT_ID
-    });
-  });
-
-  // 後始末: Firestoreアプリの削除
-  afterAll(async () => {
-    await Promise.all(firebase.apps().map(app => app.delete()));
-  });
-
   test('自分のuidと等しいIDを持つユーザ情報だけをCRUD可能であること', async () => {
     // taroで認証を持つDBを作成
     const db = createAuthApp({
