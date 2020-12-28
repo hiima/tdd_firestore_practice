@@ -1,6 +1,5 @@
 import * as firebase from '@firebase/testing';
 import * as fs from 'fs';
-import { userInfo } from 'os';
 
 const PROJECT_ID = 'qiita-demo';
 const RULES_PATH = 'firestore.rules';
