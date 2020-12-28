@@ -1,5 +1,6 @@
 import * as firebase from '@firebase/testing';
 import * as fs from 'fs';
+import { userInfo } from 'os';
 
 const PROJECT_ID = 'qiita-demo';
 const RULES_PATH = 'firestore.rules';
@@ -105,5 +106,68 @@ describe('ユーザ認証情報の検証', () => {
 
     // 自分のuidと異なるIDを持つユーザ情報は削除不可能であること
     await firebase.assertFails(userDocumentRef.delete());
+  });
+});
+
+describe('スキーマの検証', () => {
+  test('正しくないスキーマの場合は作成できないこと', async () => {
+    const db = createAuthApp({
+      uid: 'taro'
+    });
+
+    const userDocumentRef = db.collection('users').doc('taro');
+
+    // 想定外のプロパティ(ここでは`place`)がある場合はエラーとなること
+    await firebase.assertFails(
+      userDocumentRef.set({
+        ...correctUserData, place: 'Japan'
+      })
+    );
+
+    // プロパティの型が異なる場合はエラーとなること
+    await firebase.assertFails(
+      userDocumentRef.set({
+        ...correctUserData, name: 1234
+      })
+    );
+    await firebase.assertFails(
+      userDocumentRef.set({
+        ...correctUserData, gender: true
+      })
+    );
+    await firebase.assertFails(
+      userDocumentRef.set({
+        ...correctUserData, age: '1'
+      })
+    );
+  });
+
+  test('正しくないスキーマの場合は編集できないこと', async () => {
+    createAdminApp()
+      .collection('users')
+      .doc('taro')
+      .set(correctUserData);
+
+    const db = createAuthApp({
+      uid: 'taro'
+    });
+
+    const userDocumentRef = db.collection('users').doc('taro');
+
+    // 想定外のプロパティ(ここでは`place`)がある場合はエラーとなること
+    await firebase.assertFails(userDocumentRef.update({
+      place: 'Japan'
+    }));
+
+    // プロパティの型が異なる場合はエラーとなること
+    await firebase.assertFails(userDocumentRef.update({
+      name: 1234
+    }));
+    await firebase.assertFails(userDocumentRef.update({
+      gender: true
+    }));
+    await firebase.assertFails(userDocumentRef.update({
+      age: '1'
+    }));
   });
 });
