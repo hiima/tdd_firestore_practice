@@ -1,8 +1,16 @@
 rules_version = '2';
 service cloud.firestore {
+  function isAuthUser(auth, userId) {
+    // 認証あり && uidとuserIdが一致する
+    return auth != null && auth.uid == userId
+  }
+
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write;
+    match /users/{userId} {
+      allow create: if isAuthUser(request.auth, userId);
+      allow read: if isAuthUser(request.auth, userId);
+      allow update: if isAuthUser(request.auth, userId);
+      allow delete: if isAuthUser(request.auth, userId);
     }
   }
 }
